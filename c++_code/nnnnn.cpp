@@ -1,0 +1,282 @@
+#include <iostream>
+#include <sstream>
+#include <fstream>
+#include <math.h>
+#include <vector>
+
+using namespace std;
+
+
+
+long double w0[9][100],w1[100][100],w2[100][100],w3[100][100],w4[100][2],b0[100][1],b1[100][1],b2[100][1],b3[100][1],b4[2][1];
+long double datamatrix[12374][9];
+int labels[12374];
+
+
+
+
+void assignment(vector< vector<long double> >  matrix,vector< vector<long double> > weigh0,
+                vector< vector<long double> > weigh1,
+                vector< vector<long double> > weigh2,
+                vector< vector<long double> > weigh3,
+                vector< vector<long double> > weigh4,
+                vector< vector<long double> > bia0,
+                vector< vector<long double> > bia1,
+                vector< vector<long double> > bia2,
+                vector< vector<long double> > bia3,
+                vector< vector<long double> > bia4,
+				vector<int> label ) {
+
+	for(int i = 0; i<label.size(); i++) {
+		labels[i]=label[i];
+	}
+
+
+	for(int i=0; i<matrix.size(); i++) {
+		for(int j=0; j<matrix[i].size(); j++) {
+			datamatrix[i][j] = matrix[i][j];
+		}
+	}
+
+
+	for(int i = 0; i<weigh0.size(); i++) {
+		for(int j=0; j<weigh0[i].size(); j++) {
+			w0[i][j] = weigh0[i][j];
+		}
+	}
+
+	for(int i = 0; i<weigh1.size(); i++) {
+		for(int j=0; j<weigh1[i].size(); j++) {
+			w1[i][j] = weigh1[i][j];
+		}
+	}
+
+	for(int i = 0; i<weigh2.size(); i++) {
+		for(int j=0; j<weigh2[i].size(); j++) {
+			w2[i][j] = weigh2[i][j];
+		}
+	}
+
+	for(int i = 0; i<weigh3.size(); i++) {
+		for(int j=0; j<weigh3[i].size(); j++) {
+			w3[i][j] = weigh3[i][j];
+		}
+	}
+
+		for(int i = 0; i<weigh4.size(); i++) {
+		for(int j=0; j<weigh4[i].size(); j++) {
+			w4[i][j] = weigh4[i][j];
+		}
+	}
+
+
+	for(int i = 0; i<bia0.size(); i++) {
+		for(int j=0; j<bia0[i].size(); j++) {
+			b0[i][j] = bia0[i][j];
+		}
+	}
+
+	for(int i = 0; i<bia1.size(); i++) {
+		for(int j=0; j<bia1[i].size(); j++) {
+			b1[i][j] = bia1[i][j];
+		}
+	}
+
+	for(int i = 0; i<bia2.size(); i++) {
+		for(int j=0; j<bia2[i].size(); j++) {
+			b2[i][j] = bia2[i][j];
+		}
+	}
+
+	for(int i = 0; i<bia3.size(); i++) {
+		for(int j=0; j<bia3[i].size(); j++) {
+			b3[i][j] = bia3[i][j];
+		}
+	}
+
+
+		for(int i = 0; i<bia4.size(); i++) {
+		for(int j=0; j<bia4[i].size(); j++) {
+			b4[i][j] = bia4[i][j];
+		}
+	}
+
+
+	cout<<"assignment is done\n";
+
+}
+
+
+int  vectormatrix(int pp) {
+
+	int col1 = 9;
+	int row2 = 9;
+	int col2 = 100;
+
+	long double res0[100];
+	//ofstream myfile ("example.txt");
+
+
+
+	#pragma HLS dataflow
+
+	for(int j= 0; j<col2; j++) {
+		long double sum = 0;
+
+		for(int k=0; k<col1; k++) {
+			sum=sum+(w0[k][j]*datamatrix[pp][k]);
+		}
+		sum=sum+b0[j][0];
+		res0[j] = sum;
+		if (res0[j]<0) {
+			res0[j]=0;
+		}
+
+		//myfile<<res0[j]<<"\t";
+
+	}
+	//myfile<<"\n";
+	col1 = 100;
+	row2 = 100;
+	col2 = 100;
+
+	long double res1[100];
+
+
+
+	for(int j= 0; j<col2; j++) {
+		long double sum = 0;
+
+		for(int k=0; k<col1; k++) {
+			sum+=w1[k][j]*res0[k];
+		}
+		sum = sum+b1[j][0];
+		res1[j] = sum;
+		if (res1[j]<0) {
+			res1[j]=0;
+		}
+
+		//myfile<<res1[j]<<"\t";
+
+	}
+
+	//myfile<<"\n";
+
+
+
+
+//
+	col1 = 100;
+	row2 = 100;
+	col2 = 100;
+
+	long double res2[100];
+
+
+
+	for(int j= 0; j<col2; j++) {
+		long double sum = 0;
+
+		for(int k=0; k<col1; k++) {
+			sum+=w2[k][j]*res1[k];
+		}
+		sum =  sum+b2[j][0];
+		res2[j] = sum;
+		if (res2[j]<0) {
+			res2[j]=0;
+		}
+		//	myfile<<res2[j]<<"\t";
+
+	}
+
+//	myfile<<"\n";
+
+	col1 = 100;
+	row2 = 100;
+	col2 = 100;
+
+	long double res3[100];
+
+
+
+	for(int j= 0; j<col2; j++) {
+		long double sum = 0;
+
+		for(int k=0; k<col1; k++) {
+			sum+=w3[k][j]*res2[k];
+		}
+		res3[j] = sum+b3[j][0];
+
+		if(res3[j]<0) {
+			res3[j] = 0;
+		}
+		//myfile<<res3[j]<<"\t";
+	}
+
+
+
+
+	col1 = 100;
+	row2 = 100;
+	col2 = 2;
+
+	long double res4[2];
+
+
+
+	for(int j= 0; j<col2; j++) {
+		long double sum = 0;
+
+		for(int k=0; k<col1; k++) {
+			sum+=w4[k][j]*res3[k];
+		}
+		res4[j] = sum+b4[j][0];
+
+		if(res4[j]<0) {
+			res4[j] = 0;
+		}
+		//myfile<<res3[j]<<"\t";
+	}
+
+	//myfile<<"\n";
+
+
+	int score =0;
+
+
+	int index = 0;
+	long double max = res4[0];
+	for(int j=0; j<col2; j++) {
+		if( max < res4[j]) {
+			max = res4[j];
+			index = j;
+		}
+	}
+
+	//myfile.void sclose();
+
+	return index;
+
+
+}
+
+
+void scoring() {
+	int score = 0,ll=0;
+	for(int i = 0; i<12374; i++) {
+
+		ll = vectormatrix(i);
+
+		if ( ll == labels[i]) {
+			score+=1;
+		}
+
+
+
+	}
+
+	cout<< (score*100.0)/12374<<endl;
+}
+
+
+
